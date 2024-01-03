@@ -14,6 +14,8 @@ django-browser-reload = "1.11.0"
 Markdown = "3.4.4"
 ipdb = "0.13.13"
 cryptography = "41.0.4"
+djangorestframework = "^3.14.0"
+requests = "^2.31.0"
 
 
 [build-system]

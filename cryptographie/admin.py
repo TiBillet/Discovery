@@ -1,3 +1,4 @@
 from django.contrib import admin
+from cryptographie.models import PrimaryLink
 
-# Register your models here.
+admin.site.register(PrimaryLink)

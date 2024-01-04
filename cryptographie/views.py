@@ -7,10 +7,6 @@ from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 
-# The home page will signal if the pin wasen't correct:
-def home_page(request):
-    message = "Le pin que vous avez entrez n'est pas correct"
-    return render(request, 'general/home.html', {'message': message})
 
 # from the url the function will get the pin and will elaborate it
 # to get the url from the data and will send a json with the url

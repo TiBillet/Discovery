@@ -17,8 +17,7 @@ def home_page(request):
 #@csrf_exempt
 @api_view(['GET','POST'])
 def send_url_based_on_pin(request):
-    return_status = 200
-    message = f"Code pin correct"
+
     if request.method == 'POST':
         # passing the pin code to the Validator
         pin_code_validator = PinValidator(data=request.data)

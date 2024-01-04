@@ -9,9 +9,10 @@ class PinValidator(serializers.Serializer):
     #check if the primary_link object exists
     def validate_pinCode(self, value):
         try:
-            str_value = str(value)
             primary_link = PrimaryLink.objects.get(pin_code=value)
             return primary_link.server_url
         except PrimaryLink.DoesNotExist:
             raise serializers.ValidationError("The pin doesn't exist")
 
+# primary_server_core
+# cryptographie

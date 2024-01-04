@@ -28,6 +28,8 @@ def send_url_based_on_pin(request):
 
     # Get the url server link
     primary_link = pin_code_validator.validated_data
+    return HttpResponse(primary_link)
+'''
     print('The pin code', primary_link)
 
     #primary_link = pin_validate.validated_data.get('pin_link')
@@ -37,3 +39,4 @@ def send_url_based_on_pin(request):
     data['message'] = message
 
     return JsonResponse(data, safe=False)
+'''

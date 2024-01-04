@@ -3,6 +3,7 @@ from .models import PrimaryLink
 from . serializers import PinValidator
 import json, requests
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
+from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 
@@ -23,20 +24,8 @@ def send_url_based_on_pin(request):
         pin_code_validator = PinValidator(data=request.data)
         #checking if the pin code is correct
         if not pin_code_validator.is_valid():
-            print(" Wrong pin")
             return HttpResponseBadRequest("Code pin incorrect")
 
     # Get the url server link
     primary_link = pin_code_validator.validated_data
-    return HttpResponse(primary_link)
-'''
-    print('The pin code', primary_link)
-
-    #primary_link = pin_validate.validated_data.get('pin_link')
-    data = {}
-    data['url'] = primary_link
-    data['return_status'] = return_status
-    data['message'] = message
-
-    return JsonResponse(data, safe=False)
-'''
+    return Response(primary_link)

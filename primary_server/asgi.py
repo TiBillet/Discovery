@@ -1,5 +1,5 @@
 """
-ASGI config for primary_server_core project.
+ASGI config for primary_server project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

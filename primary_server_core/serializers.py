@@ -13,6 +13,3 @@ class PinValidator(serializers.Serializer):
             return primary_link.server_url
         except PrimaryLink.DoesNotExist:
             raise serializers.ValidationError("The pin doesn't exist")
-
-# primary_server_core
-# cryptographie

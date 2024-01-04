@@ -1,4 +1,4 @@
 from django.contrib import admin
-from cryptographie.models import PrimaryLink
+from primary_server_core.models import PrimaryLink
 
 admin.site.register(PrimaryLink)

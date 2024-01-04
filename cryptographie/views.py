@@ -21,16 +21,18 @@ def send_url_based_on_pin(request):
     if request.method == 'POST':
         # passing the pin code to the Validator
         pin_code_validator = PinValidator(data=request.data)
+        #checking if the pin code is correct
         if not pin_code_validator.is_valid():
+            print(" Wrong pin")
             return HttpResponseBadRequest("Code pin incorrect")
 
     # Get the url server link
-    pin_code = pin_code_validator.validated_data['pinCode']
-    primary_link = PrimaryLink.objects.get(pin_code=pin_code)
+    primary_link = pin_code_validator.validated_data
+    print('The pin code', primary_link)
 
     #primary_link = pin_validate.validated_data.get('pin_link')
     data = {}
-    data['url'] = primary_link.server_url
+    data['url'] = primary_link
     data['return_status'] = return_status
     data['message'] = message
 

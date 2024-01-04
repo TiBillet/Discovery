@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import PrimaryLink
 from . serializers import PinValidator
 import json, requests
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
 
@@ -14,43 +14,24 @@ def home_page(request):
 # from the url the function will get the pin and will elaborate it
 # to get the url from the data and will send a json with the url
 #@csrf_exempt
-@api_view(['POST'])
-def send_url_based_on_pin(request, pin_link):
-    '''
-    if request.method == 'POST':
-        pin_validate = PinValidator(data=request.data)
-    # send to home page if the pin is invalid
-    if not pin_validate.is_valid():
-        print("Not valid")
-        return redirect('home_page')
-    # Get the object if the pin is valid
-    print("Valiiiiid")
-    '''
-
+@api_view(['GET','POST'])
+def send_url_based_on_pin(request):
     return_status = 200
     message = f"Code pin correct"
     if request.method == 'POST':
-        json_data = json.loads(request.body)
-    try:
-        data = str(json_data['pinCode'])
-    except KeyError:
-        print("nothing")
+        # passing the pin code to the Validator
+        pin_code_validator = PinValidator(data=request.data)
+        if not pin_code_validator.is_valid():
+            return HttpResponseBadRequest("Code pin incorrect")
 
-    print(f"Data Type = {type(data)}")
-    return_url = None
-    try:
-        primary_link = PrimaryLink.objects.get(pin_code=data)
-        return_url = primary_link.server_url
-    except PrimaryLink.DoesNotExist:
-        return_status = 400
-        message = f"Le code pin n'existe pas!"
+    # Get the url server link
+    pin_code = pin_code_validator.validated_data['pinCode']
+    primary_link = PrimaryLink.objects.get(pin_code=pin_code)
 
     #primary_link = pin_validate.validated_data.get('pin_link')
-    data = []
-    data.append({
-        'url': return_url,
-        'return_status': return_status,
-        'message': message
-    })
-    print(data)
+    data = {}
+    data['url'] = primary_link.server_url
+    data['return_status'] = return_status
+    data['message'] = message
+
     return JsonResponse(data, safe=False)

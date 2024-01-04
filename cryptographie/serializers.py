@@ -3,13 +3,8 @@ from rest_framework import serializers
 
 
 # Validation of the pin code
-class PinValidator(serializers.ModelSerializer):
-    class Meta:
-        model = PrimaryLink
-        fields = ['pin_code']
-    #pin_code = serializers.CharField(max_length=6, required=True)
-
-    '''
+class PinValidator(serializers.Serializer):
+    pinCode = serializers.IntegerField(required=True)
     #check if the primary_link object exists
     def validate_pin_code(self, value):
         try:
@@ -18,5 +13,4 @@ class PinValidator(serializers.ModelSerializer):
         except PrimaryLink.DoesNotExist:
             raise serializers.ValidationError("The pin doesn't exist")
 
-        return primary_link
-    '''
+        return primary_link.server_url

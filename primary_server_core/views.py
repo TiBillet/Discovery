@@ -16,10 +16,7 @@ def send_url_based_on_pin(request):
     pin_code_validator = PinValidator(data=request.data)
     # checking if the pin code is correct
     if not pin_code_validator.is_valid():
-        return Response({'message': "Code Pin Incorrect"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(pin_code_validator.errors, status=status.HTTP_404_NOT_FOUND)
 
-    # get the validated pin_code
-    pin_code = pin_code_validator.validated_data['pinCode']
-    # get the server_url by using the validated pin_code
-    server_url = PrimaryLink.objects.get(pin_code=pin_code).server_url
-    return Response({'message': 'Code Pin Correct', 'url': server_url}, status=status.HTTP_200_OK)
+    # send the server_url
+    return Response(pin_code_validator.server_url, status=status.HTTP_200_OK)

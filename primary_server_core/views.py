@@ -8,7 +8,7 @@ from rest_framework.decorators import api_view
 
 
 # from the url the function will get the pin and will elaborate it
-# to get the url from the data and will send a json with the url
+# to get the url from the data and will send a json with the server_url
 #@csrf_exempt
 @api_view(['POST'])
 def send_url_based_on_pin(request):
@@ -18,6 +18,8 @@ def send_url_based_on_pin(request):
     if not pin_code_validator.is_valid():
         return Response({'message': "Code Pin Incorrect"}, status=status.HTTP_404_NOT_FOUND)
 
-    # Get the url server link
-    primary_link = pin_code_validator.validated_data
-    return Response({'message': 'Code Pin Correct', 'url': primary_link}, status=status.HTTP_200_OK)
+    # get the validated pin_code
+    pin_code = pin_code_validator.validated_data['pinCode']
+    # get the server_url by using the validated pin_code
+    server_url = PrimaryLink.objects.get(pin_code=pin_code).server_url
+    return Response({'message': 'Code Pin Correct', 'url': server_url}, status=status.HTTP_200_OK)

@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 # Validation of the pin code
 class PinValidator(serializers.Serializer):
-    pinCode = serializers.CharField(max_length=6, required=True)
+    pinCode = serializers.CharField(max_length=8, min_length=6, required=True)
 
     #check if the primary_link object exists
     def validate_pinCode(self, value):

@@ -11,11 +11,13 @@ packages = [{include = "primarilink_serveur"}]
 python = "^3.10"
 django = "4.2.4"
 django-browser-reload = "1.11.0"
-Markdown = "3.4.4"
 ipdb = "0.13.13"
+ipython = "8.11.0"
+Markdown = "3.4.4"
 cryptography = "41.0.4"
 djangorestframework = "^3.14.0"
 requests = "^2.31.0"
+django-extensions = "^3.2.3"
 
 
 [build-system]

@@ -1,0 +1,8 @@
+idea
+./idea
+idea/
+__pycache__
+db.sqlite3
+/poetry.lock
+*.pyc
+/primary_server/.idea/

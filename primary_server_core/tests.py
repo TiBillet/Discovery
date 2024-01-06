@@ -23,8 +23,8 @@ class PrimaryLinkCase(TestCase):
     # Testing the return of status.HTTP_404 or 200
     def test_post_status(self):
         # Testing retour from POST
-        response1 = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'789112'})
-        response2 = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'111111'})
+        response1 = self.client.post('/pin_code/',{"pinCode":'789112'})
+        response2 = self.client.post('/pin_code/',{"pinCode":'111111'})
 
         # checking the return status with the right code posted
         self.assertEqual(response1.status_code, 200)
@@ -37,10 +37,10 @@ class PrimaryLinkCase(TestCase):
 
     # Testing the error message or the server_link
     def test_return_message_or_server_link(self):
-        respons = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'789112'})
-        smaller_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'78911'})
-        biger_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'123456789'})
-        wrong_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'654321'})
+        respons = self.client.post('/pin_code/',{"pinCode":'789112'})
+        smaller_pin = self.client.post('/pin_code/',{"pinCode":'78911'})
+        biger_pin = self.client.post('/pin_code/',{"pinCode":'123456789'})
+        wrong_pin = self.client.post('/pin_code/',{"pinCode":'654321'})
 
         # testing different pin_codes return, the right one, wrong one, biger and smaller.
         self.assertEqual(respons.data ,"https://tibillet.org/")

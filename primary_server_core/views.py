@@ -16,6 +16,7 @@ def send_url_based_on_pin(request):
     pin_code_validator = PinValidator(data=request.data)
     # checking if the pin code is correct
     if not pin_code_validator.is_valid():
+        #print("Decomposed pin_code ", pin_code_validator.errors['pinCode'][0])
         return Response(pin_code_validator.errors, status=status.HTTP_404_NOT_FOUND)
 
     # send the server_url

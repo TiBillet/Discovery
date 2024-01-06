@@ -37,8 +37,14 @@ class PrimaryLinkCase(TestCase):
 
     # Testing the error message or the server_link
     def test_return_message_or_server_link(self):
-        smallen_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'78911'})
-        biger_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'123456789'})
         respons = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'789112'})
+        smaller_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'78911'})
+        biger_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'123456789'})
+        wrong_pin = self.client.post('http://127.0.0.1:8000/pin_code/',{"pinCode":'654321'})
 
-        self.assertEqual(respons.status_code,200)
+        # testing different pin_codes return, the right one, wrong one, biger and smaller.
+        self.assertEqual(respons.data ,"https://tibillet.org/")
+        self.assertNotEquals(respons.data, "https://google.fr/")
+        self.assertEqual(smaller_pin.data['pinCode'][0],"Ensure this field has at least 6 characters.")
+        self.assertEqual(biger_pin.data['pinCode'][0] ,"Ensure this field has no more than 8 characters.")
+        self.assertEqual(wrong_pin.data['pinCode'][0] ,"Code Pin Incorrect.")

@@ -12,4 +12,4 @@ class PinValidator(serializers.Serializer):
             self.server_url = PrimaryLink.objects.get(pin_code=value).server_url
             return value
         except PrimaryLink.DoesNotExist:
-            raise serializers.ValidationError("The pin doesn't exist")
+            raise serializers.ValidationError("Code Pin Incorrect.")

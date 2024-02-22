@@ -1,0 +1,29 @@
+version: '3'
+services:
+  primary_link:
+    build: .
+    container_name: primary_link
+    hostname: primary_link
+    env_file:
+      - .env
+    volumes:
+      - ./:/DjangoFiles # For dev
+      - ./database:/DjangoFiles/database
+    networks:
+      - frontend
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=frontend
+      - traefik.http.routers.primary_link.tls.certresolver=myresolver
+      - traefik.http.routers.primary_link.rule=Host(`$DOMAIN`)
+      - traefik.http.services.primary_link.loadbalancer.server.port=8000
+
+#    command: "poetry run python manage.py runserver" # on port 8000
+    command: "sleep infinity" # for dev
+
+
+networks:
+  frontend:
+    external: true
+
+

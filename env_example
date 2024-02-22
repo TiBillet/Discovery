@@ -1,0 +1,8 @@
+# Secret -> ./manage.py generate_secret_key
+DJANGO_SECRET=''
+
+DOMAIN=''
+DEBUG=0
+TEST=0
+SENTRY_DNS=""
+

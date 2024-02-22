@@ -1,4 +1,4 @@
-# Server to link easyly to the Android app to cashless server
+# Server to link the Cashless Android app to the server
 
 Requierement :
 - python 3.10

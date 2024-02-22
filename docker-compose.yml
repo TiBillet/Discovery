@@ -4,6 +4,7 @@ services:
     build: .
     container_name: primary_link
     hostname: primary_link
+    restart: unless-stopped
     env_file:
       - .env
     volumes:
@@ -18,8 +19,8 @@ services:
       - traefik.http.routers.primary_link.rule=Host(`$DOMAIN`)
       - traefik.http.services.primary_link.loadbalancer.server.port=8000
 
-#    command: "poetry run python manage.py runserver" # on port 8000
-    command: "sleep infinity" # for dev
+    command: "bash launch.sh"
+#    command: "sleep infinity" # for dev
 
 
 networks:

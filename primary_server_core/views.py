@@ -48,6 +48,8 @@ def create_link(request):
     while PrimaryLink.objects.filter(pin_code=validated_data['pin_code']).exists():
         validated_data['pin_code'] = random.randint(100000, 999999)
 
-    link = PrimaryLink.objects.create(**validated_data)
-
-    return Response({"pin_code": link.pin_code}, status=status.HTTP_201_CREATED)
+    try :
+        link = PrimaryLink.objects.create(**validated_data)
+        return Response({"pin_code": link.pin_code}, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -2,10 +2,19 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from uuid import uuid4
 
+
+
 #Creating the User Class in case we'll need one in the future
 class CustomUser(AbstractUser):
     uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False, db_index=True)
     email = models.EmailField(max_length=100, unique=True)
+
+
+class Client(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False, db_index=True)
+    name = models.CharField(max_length=100, unique=True)
+    rsa_pub_pem = models.CharField(max_length=512, unique=True, blank=True, null=True, verbose_name="RSA public pem key")
+
 
 # The class where we'll stock the url's, pin code's and the rsa crypto of the server
 class PrimaryLink(models.Model):

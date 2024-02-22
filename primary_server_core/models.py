@@ -23,3 +23,6 @@ class PrimaryLink(models.Model):
     server_url = models.URLField(max_length=200, unique=True, verbose_name="Url server")
     rsa_pub_pem = models.CharField(max_length=512, unique=True, blank=True, null=True, verbose_name="RSA public pem key")
     locale = models.CharField(max_length=2, default='en', verbose_name="Locale")
+
+    def __str__(self):
+        return f"{self.server_url} : {self.pin_code}"

@@ -1,5 +1,6 @@
 import random
 
+from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
 
 from .models import PrimaryLink
@@ -42,6 +43,15 @@ def create_link(request):
     if not new_link.is_valid():
         return Response(new_link.errors, status=status.HTTP_400_BAD_REQUEST)
     validated_data = new_link.validated_data
+
+    # Si on est en dev'/debug
+    if settings.DEBUG:
+        if PrimaryLink.objects.filter(server_url=validated_data['server_url']).exists():
+            # update rsa key
+            link = PrimaryLink.objects.get(server_url=validated_data['server_url'])
+            link.rsa_pub_pem = validated_data['rsa_pub_pem']
+            link.save()
+            return Response({"pin_code": link.pin_code}, status=status.HTTP_201_CREATED)
 
     # Génération du code pin
     validated_data['pin_code'] = random.randint(100000, 999999)

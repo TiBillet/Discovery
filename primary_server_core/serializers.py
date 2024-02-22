@@ -1,12 +1,10 @@
 import logging
 
-import cryptography.hazmat.primitives
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
-from cryptography.hazmat.primitives import serialization
 
 from .models import PrimaryLink, Client
 

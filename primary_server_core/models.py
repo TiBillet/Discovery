@@ -1,28 +1,45 @@
-from django.db import models
-from django.contrib.auth.models import AbstractUser
 from uuid import uuid4
 
+from django.contrib.auth.models import AbstractUser
+from django.db import models
+from rest_framework_api_key.models import AbstractAPIKey
 
 
-#Creating the User Class in case we'll need one in the future
+# Creating the User Class in case we'll need one in the future
 class CustomUser(AbstractUser):
     uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False, db_index=True)
     email = models.EmailField(max_length=100, unique=True)
 
 
-class Client(models.Model):
-    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False, db_index=True)
-    name = models.CharField(max_length=100, unique=True)
-    rsa_pub_pem = models.CharField(max_length=512, unique=True, blank=True, null=True, verbose_name="RSA public pem key")
-
-
 # The class where we'll stock the url's, pin code's and the rsa crypto of the server
-class PrimaryLink(models.Model):
+class CashlessServer(models.Model):
     uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False, db_index=True)
-    pin_code = models.CharField(max_length=8, unique=True, verbose_name="Code")
     server_url = models.URLField(max_length=200, unique=True, verbose_name="Url server")
-    rsa_pub_pem = models.CharField(max_length=512, unique=True, blank=True, null=True, verbose_name="RSA public pem key")
+    server_rsa_pub_pem = models.CharField(max_length=512, unique=True, blank=True, null=True,
+                                          verbose_name="RSA public pem key")
     locale = models.CharField(max_length=2, default='en', verbose_name="Locale")
 
     def __str__(self):
-        return f"{self.server_url} : {self.pin_code}"
+        return f"{self.server_url}"
+
+
+class Client(models.Model):
+    uuid = models.UUIDField(primary_key=True, default=uuid4, editable=False, db_index=True)
+    name = models.CharField(max_length=100)
+    rsa_pub_pem = models.CharField(max_length=512, unique=True, blank=True, null=True,
+                                   verbose_name="RSA public pem key")
+    pin_code = models.PositiveIntegerField(max_length=8, unique=True, blank=True, null=True)
+    cashless_server = models.ForeignKey(CashlessServer, on_delete=models.CASCADE, related_name='clients')
+
+
+class ServerAPIKey(AbstractAPIKey):
+    server = models.ForeignKey(
+        CashlessServer,
+        on_delete=models.CASCADE,
+        related_name="api_keys",
+    )
+
+    class Meta:
+        ordering = ("-created",)
+        verbose_name = "API key"
+        verbose_name_plural = "API keys"

@@ -19,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%w#p*ys)qst88c2=p4b^18wy!o8$e(2gvy0ax$q-!5^b1@dx8k'
+SECRET_KEY = os.environ.get('DJANGO_SECRET')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get('DEBUG') == "1")
@@ -28,7 +28,7 @@ ALLOWED_HOSTS = ['*'] if DEBUG else [f'{os.environ.get("DOMAIN")}', ]
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost",
     "https://tibillet.localhost",
-    "https://primary.tibillet.localhost",
+    "https://discovery.tibillet.localhost",
 ] if DEBUG else [f'https://{os.environ.get("DOMAIN")}', ]
 
 # It will limit the number of api request
@@ -52,8 +52,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'primary_server_core',
     'django_extensions',
+    'rest_framework',
+    'rest_framework_api_key',
+    'primary_server_core',
 ]
 
 MIDDLEWARE = [

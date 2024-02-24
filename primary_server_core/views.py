@@ -3,13 +3,14 @@ import random
 from django.conf import settings
 from rest_framework.throttling import AnonRateThrottle
 
-from .models import PrimaryLink
-from .serializers import PinValidator, LinkValidator
+from .models import CashlessServer, Client, ServerAPIKey
+from .permissions import HasAPIKey
+from .serializers import PinValidator, NewServerValidator, NewClientValidator
 import json, requests
 from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.decorators import api_view, throttle_classes, permission_classes
 
 
 # from the url the function will get the pin and will elaborate it
@@ -25,11 +26,12 @@ def send_url_based_on_pin(request):
         # print("Decomposed pin_code ", pin_code_validator.errors['pinCode'][0])
         return Response(pin_code_validator.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    link: PrimaryLink = pin_code_validator.link
+    client: Client = pin_code_validator.client
+    server = client.cashless_server
     data = {
-        "server_url": link.server_url,
-        "rsa_pub_pem": link.rsa_pub_pem,
-        "locale": link.locale,
+        "server_url": server.server_url,
+        "server_rsa_pub_pem": server.server_rsa_pub_pem,
+        "locale": server.locale,
     }
 
     # send the server_url
@@ -38,28 +40,45 @@ def send_url_based_on_pin(request):
 
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
-def create_link(request):
-    new_link = LinkValidator(data=request.data)
-    if not new_link.is_valid():
-        return Response(new_link.errors, status=status.HTTP_400_BAD_REQUEST)
-    validated_data = new_link.validated_data
+def new_server(request):
+    new_server_validator = NewServerValidator(data=request.data)
+    if not new_server_validator.is_valid():
+        return Response(new_server_validator.errors, status=status.HTTP_400_BAD_REQUEST)
+    validated_data = new_server_validator.validated_data
 
-    # Si on est en dev'/debug
-    if settings.DEBUG:
-        if PrimaryLink.objects.filter(server_url=validated_data['server_url']).exists():
-            # update rsa key
-            link = PrimaryLink.objects.get(server_url=validated_data['server_url'])
-            link.rsa_pub_pem = validated_data['rsa_pub_pem']
-            link.save()
-            return Response({"pin_code": link.pin_code}, status=status.HTTP_201_CREATED)
+    # La clé et sa signature on été validée.
+    # On remplace une eventuelle vieille clé si elle existe
+    server, created = CashlessServer.objects.get_or_create(server_url=validated_data['server_url'])
+    server.rsa_pub_pem = validated_data['server_rsa_pub_pem']
+    server.api_keys.all().delete()
+    server.save()
 
-    # Génération du code pin
-    validated_data['pin_code'] = random.randint(100000, 999999)
-    while PrimaryLink.objects.filter(pin_code=validated_data['pin_code']).exists():
-        validated_data['pin_code'] = random.randint(100000, 999999)
+    enc_key, key = ServerAPIKey.objects.create_key(name=f"{validated_data['server_url']}", server=server)
+    data = {
+        "created": created,
+        "key": key,
+    }
 
-    try :
-        link = PrimaryLink.objects.create(**validated_data)
-        return Response({"pin_code": link.pin_code}, status=status.HTTP_201_CREATED)
-    except Exception as e:
-        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    return Response(data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['POST'])
+@permission_classes([HasAPIKey])
+def new_client(request):
+    new_client_validator = NewClientValidator(data=request.data)
+    if new_client_validator.is_valid():
+        validated_data = new_client_validator.validated_data
+        serveur = request.server
+
+        # # Génération du code pin
+        pin_code = random.randint(100000, 999999)
+        while Client.objects.filter(pin_code=pin_code).exists():
+            pin_code = random.randint(100000, 999999)
+
+        Client.objects.create(name=validated_data['client_name'],
+                                       cashless_server=serveur,
+                                       pin_code=pin_code)
+
+        return Response({"pin_code": pin_code}, status=status.HTTP_201_CREATED)
+
+    return Response(new_client_validator.errors, status=status.HTTP_400_BAD_REQUEST)

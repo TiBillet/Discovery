@@ -18,5 +18,6 @@ COPY --chown=poetry_user:poetry_user ./ /DjangoFiles
 WORKDIR /DjangoFiles
 RUN poetry install
 
+# ENTRYPOINT ["poetry", "run"]
 # docker build -t tibillet/primarylink:latest .
 # docker push tibillet/primarylink:latest

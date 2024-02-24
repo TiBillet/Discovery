@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "PrimaryLink"
+name = "Discovery"
 version = "0.1.0"
 description = "Connect app to server"
 authors = ["Cooperative Code Commun"]
@@ -19,6 +19,7 @@ ipdb = "^0.13.13"
 ipython = "^8.11.0"
 werkzeug = "^3.0.1"
 gunicorn = "^21.2.0"
+djangorestframework-api-key = "^3.0.0"
 
 
 [build-system]

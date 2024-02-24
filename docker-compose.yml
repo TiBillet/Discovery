@@ -1,9 +1,9 @@
 version: '3'
 services:
-  primary_link:
+  discovery:
     build: .
-    container_name: primary_link
-    hostname: primary_link
+    container_name: discovery
+    hostname: discovery
     restart: unless-stopped
     env_file:
       - .env
@@ -15,12 +15,12 @@ services:
     labels:
       - traefik.enable=true
       - traefik.docker.network=frontend
-      - traefik.http.routers.primary_link.tls.certresolver=myresolver
-      - traefik.http.routers.primary_link.rule=Host(`$DOMAIN`)
-      - traefik.http.services.primary_link.loadbalancer.server.port=8000
+      - traefik.http.routers.discovery.tls.certresolver=myresolver
+      - traefik.http.routers.discovery.rule=Host(`$DOMAIN`)
+      - traefik.http.services.discovery.loadbalancer.server.port=8000
 
-    command: "bash launch.sh"
-#    command: "sleep infinity" # for dev
+#    command: "bash launch.sh"
+    command: "sleep infinity" # for dev
 
 
 networks:

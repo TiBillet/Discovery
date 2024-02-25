@@ -20,6 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('DJANGO_SECRET')
+if len(SECRET_KEY) != 50:
+    raise ValueError('DJANGO_SECRET must be 50 characters long. run "./manage.py generate_secret_key"')
+
+FERNET_KEY = os.environ.get('FERNET_KEY')
+if len(FERNET_KEY) != 44:
+    raise ValueError('FERNET_KEY must be 32bit Fernet key. run "./manage.py generate_fernet"')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get('DEBUG') == "1")

@@ -1,3 +1,4 @@
+import hashlib
 import json, base64
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import Fernet
@@ -9,6 +10,8 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 import logging
+
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
@@ -56,6 +59,44 @@ def get_public_key(public_key_pem: str) -> rsa.RSAPublicKey | bool:
         raise e
 
 
+def hash_hexdigest(utf8_string):
+    return hashlib.sha256(utf8_string.encode('utf-8')).hexdigest()
+
+def fernet_encrypt(message: str) -> str:
+    message = message.encode('utf-8')
+    encryptor = Fernet(settings.FERNET_KEY)
+    return encryptor.encrypt(message).decode('utf-8')
+
+
+def fernet_decrypt(message: str) -> str:
+    message = message.encode('utf-8')
+    decryptor = Fernet(settings.FERNET_KEY)
+    return decryptor.decrypt(message).decode('utf-8')
+
+
+def rsa_encrypt_string(utf8_string=None, public_key: rsa.RSAPublicKey=None) -> str:
+    message = utf8_string.encode('utf-8')
+    ciphertext = public_key.encrypt(
+        message,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return base64.urlsafe_b64encode(ciphertext).decode('utf-8')
+
+def rsa_decrypt_string(utf8_enc_string: str, private_key: rsa.RSAPrivateKey) -> str:
+    ciphertext = base64.urlsafe_b64decode(utf8_enc_string)
+    plaintext = private_key.decrypt(
+        ciphertext,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+    return plaintext.decode('utf-8')
 
 def sign_message(message: bytes = None,
                  private_key: rsa.RSAPrivateKey = None) -> bytes:

@@ -1,8 +1,6 @@
 from django.test import TestCase
 from primary_server_core.models import PrimaryLink
 
-'''
-'''
 # Creating the PrimaryLink test clasx
 class PrimaryLinkCase(TestCase):
     # creating a primary_link object

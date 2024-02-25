@@ -1,5 +1,7 @@
 # Secret -> ./manage.py generate_secret_key
 DJANGO_SECRET=''
+# Fernet Key -> ./manage.py generate_fernet
+FERNET_KEY=''
 
 DOMAIN=''
 DEBUG=0

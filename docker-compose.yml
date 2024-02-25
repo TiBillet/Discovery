@@ -8,6 +8,7 @@ services:
     env_file:
       - .env
     volumes:
+      - ./bashrc:/home/poetry_user/.bashrc
       - ./:/DjangoFiles # For dev
       - ./database:/DjangoFiles/database
     networks:

@@ -1,6 +1,7 @@
 import random
 
 from django.conf import settings
+from django.utils import timezone
 from rest_framework.throttling import AnonRateThrottle
 
 from .models import CashlessServer, Client, ServerAPIKey
@@ -12,13 +13,15 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import api_view, throttle_classes, permission_classes
 
+from .utils import rsa_encrypt_string, rsa_decrypt_string, hash_hexdigest
+
 
 # from the url the function will get the pin and will elaborate it
 # to get the url from the data and will send a json with the server_url
 # @csrf_exempt
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
-def send_url_based_on_pin(request):
+def pin_code(request):
     # passing the pin code to the Validator
     pin_code_validator = PinValidator(data=request.data)
     # checking if the pin code is correct
@@ -27,14 +30,22 @@ def send_url_based_on_pin(request):
         return Response(pin_code_validator.errors, status=status.HTTP_400_BAD_REQUEST)
 
     client: Client = pin_code_validator.client
+    client.claimed_at = timezone.now()
+    client.rsa_pub_pem = pin_code_validator.validated_data['public_pem']
+    client.save()
+
     server = client.cashless_server
+    client_pub_key = client.get_public_key()
+    enc_url = rsa_encrypt_string(
+        utf8_string=server.get_url(),
+        public_key=client_pub_key)
+
     data = {
-        "server_url": server.server_url,
-        "server_rsa_pub_pem": server.server_rsa_pub_pem,
+        "server_url": enc_url,
+        "server_public_pem": server.public_pem,
         "locale": server.locale,
     }
 
-    # send the server_url
     return Response(data, status=status.HTTP_200_OK)
 
 
@@ -46,19 +57,26 @@ def new_server(request):
         return Response(new_server_validator.errors, status=status.HTTP_400_BAD_REQUEST)
     validated_data = new_server_validator.validated_data
 
+    # L'url est stoquée chiffrée.
+    # Pour faire une recherche, on la hash d'abord
+    hashed_url = hash_hexdigest(validated_data['url'])
+
     # La clé et sa signature on été validée.
     # On remplace une eventuelle vieille clé si elle existe
-    server, created = CashlessServer.objects.get_or_create(server_url=validated_data['server_url'])
-    server.rsa_pub_pem = validated_data['server_rsa_pub_pem']
+    server, created = CashlessServer.objects.get_or_create(hashed_url=hashed_url)
+    # Si le serveur existe déjà, on supprime les anciennes clés,
+    # en cas de reinstallation ou de changement de clé
+    # Le DNS a été validé par la requete de confirmation dans le validateur NewServerValidator
+    server.public_pem = validated_data['public_pem']
     server.api_keys.all().delete()
+    server.set_url(validated_data['url'])
     server.save()
 
-    enc_key, key = ServerAPIKey.objects.create_key(name=f"{validated_data['server_url']}", server=server)
+    enc_key, key = ServerAPIKey.objects.create_key(name=f"{hashed_url}", server=server)
     data = {
         "created": created,
         "key": key,
     }
-
     return Response(data, status=status.HTTP_201_CREATED)
 
 
@@ -76,8 +94,8 @@ def new_client(request):
             pin_code = random.randint(100000, 999999)
 
         Client.objects.create(name=validated_data['client_name'],
-                                       cashless_server=serveur,
-                                       pin_code=pin_code)
+                              cashless_server=serveur,
+                              pin_code=pin_code)
 
         return Response({"pin_code": pin_code}, status=status.HTTP_201_CREATED)
 

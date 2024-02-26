@@ -38,9 +38,11 @@ class PinValidator(serializers.Serializer):
 
     def validate(self, attrs):
         client = get_object_or_404(Client, pin_code=attrs.get('pin_code'))
-        # Si le code a déja été réclamé, on envoie bouler
+
+        # Si le code a déja été réclamé, on envoie bouler. Sauf si on est en mode DEBUG
         if client.claimed_at and not settings.DEBUG:
             raise serializers.ValidationError("Client already claimed")
+
         self.client = client
         return attrs
 

@@ -68,14 +68,18 @@ class NewServerValidator(serializers.Serializer):
         # Récupération de la clé validée dans validate_public_pem
         sended_public_key = self.sended_public_key
 
-        # On fait une requete au serveur pour valider la clé
-        confirmation = requests.get(f"{attrs['url']}/api/signed_key/", verify=(not settings.DEBUG))
-        if confirmation.status_code != 200:
-            raise serializers.ValidationError("Server not valid")
+        try :
+            # On fait une requete au serveur pour valider la clé
+            confirmation = requests.get(f"{attrs['url']}/api/signed_key/", verify=(not settings.DEBUG))
+            if confirmation.status_code != 200:
+                raise serializers.ValidationError("URL Server not valid, confirmation request not reached")
 
-        # La requete est ok, on parse et on vérifie la donnée envoyée
-        data = confirmation.json()
-        confirmation_public_pem = get_public_key(data.get('public_pem'))
+            # La requete est ok, on parse et on vérifie la donnée envoyée
+            data = confirmation.json()
+            confirmation_public_pem = get_public_key(data.get('public_pem'))
+        except Exception as e :
+            raise serializers.ValidationError(f"URL Server not valid, confirmation request not reached : {e}")
+
 
         # Vérification de la clé envoyé par le serveur et la clé envoyé par le lien de vérification
         # De cette façon, on vérifie l'url du serveur. La demande correspond bien à un serveur hebergé sur ce DNS.

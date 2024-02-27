@@ -29,7 +29,6 @@ class CashlessServer(models.Model):
         self.hashed_url = hash_hexdigest(self.url)
         self.save()
 
-    # On chiffre l'url avec fernet
     def set_url(self, url):
         self.url = fernet_encrypt(url)
         self.save()

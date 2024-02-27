@@ -1,19 +1,15 @@
 import random
 
-from django.conf import settings
 from django.utils import timezone
+from rest_framework import status
+from rest_framework.decorators import api_view, throttle_classes, permission_classes
+from rest_framework.response import Response
 from rest_framework.throttling import AnonRateThrottle
 
 from .models import CashlessServer, Client, ServerAPIKey
 from .permissions import HasAPIKey
 from .serializers import PinValidator, NewServerValidator, NewClientValidator
-import json, requests
-from django.http import JsonResponse, HttpResponse, HttpResponseBadRequest
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.decorators import api_view, throttle_classes, permission_classes
-
-from .utils import rsa_encrypt_string, rsa_decrypt_string, hash_hexdigest
+from .utils import rsa_encrypt_string, hash_hexdigest
 
 
 # from the url the function will get the pin and will elaborate it
@@ -35,13 +31,9 @@ def pin_code(request):
     client.save()
 
     server = client.cashless_server
-    client_pub_key = client.get_public_key()
-    enc_url = rsa_encrypt_string(
-        utf8_string=server.get_url(),
-        public_key=client_pub_key)
 
     data = {
-        "server_url": enc_url,
+        "server_url": server.get_url(),
         "server_public_pem": server.public_pem,
         "locale": server.locale,
     }

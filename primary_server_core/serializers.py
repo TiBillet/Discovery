@@ -15,25 +15,26 @@ logger = logging.getLogger(__name__)
 # Validation of the pin code
 class PinValidator(serializers.Serializer):
     pin_code = serializers.CharField(max_length=6, min_length=6)
-    signature = serializers.CharField(max_length=512)
-    public_pem = serializers.CharField(max_length=512)
 
-    def validate_signature(self, value):
-        if not self.initial_data.get('public_pem'):
-            raise serializers.ValidationError("Public pem not sended")
-
-        try:
-            public_key = get_public_key(self.initial_data.get('public_pem'))
-            if public_key.key_size < 2048:
-                raise serializers.ValidationError("Public key size too small")
-        except Exception as e:
-            raise serializers.ValidationError("Public key not valid, must be 2048 min rsa key")
-
-        is_valid = verify_signature(public_key, self.initial_data.get('pin_code').encode('utf-8'), value)
-        if not is_valid:
-            raise serializers.ValidationError("Signature not valid")
-        print(f"signature is_valid : {is_valid}")
-        return value
+    # signature = serializers.CharField(max_length=512)
+    # public_pem = serializers.CharField(max_length=512)
+    #
+    # def validate_signature(self, value):
+    #     if not self.initial_data.get('public_pem'):
+    #         raise serializers.ValidationError("Public pem not sended")
+    #
+    #     try:
+    #         public_key = get_public_key(self.initial_data.get('public_pem'))
+    #         if public_key.key_size < 2048:
+    #             raise serializers.ValidationError("Public key size too small")
+    #     except Exception as e:
+    #         raise serializers.ValidationError("Public key not valid, must be 2048 min rsa key")
+    #
+    #     is_valid = verify_signature(public_key, self.initial_data.get('pin_code').encode('utf-8'), value)
+    #     if not is_valid:
+    #         raise serializers.ValidationError("Signature not valid")
+    #     print(f"signature is_valid : {is_valid}")
+    #     return value
 
 
     def validate(self, attrs):

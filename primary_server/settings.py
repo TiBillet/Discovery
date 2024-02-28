@@ -37,6 +37,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://discovery.tibillet.localhost",
 ] if DEBUG else [f'https://{os.environ.get("DOMAIN")}', ]
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+]
+
 # It will limit the number of api request
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': [
@@ -67,12 +71,14 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'primary_server.urls'
 

@@ -27,7 +27,7 @@ def pin_code(request):
 
     client: Client = pin_code_validator.client
     client.claimed_at = timezone.now()
-    client.rsa_pub_pem = pin_code_validator.validated_data['public_pem']
+    # client.rsa_pub_pem = pin_code_validator.validated_data['public_pem']
     client.save()
 
     server = client.cashless_server

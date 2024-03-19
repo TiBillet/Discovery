@@ -29,6 +29,19 @@ if len(FERNET_KEY) != 44:
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = (os.environ.get('DEBUG') == "1")
+if not DEBUG:
+    import sentry_sdk
+    sentry_sdk.init(
+        dsn="https://2deb6df635f110f0ff2d333a61c09b8c@o262913.ingest.us.sentry.io/4506938390216704",
+        # Set traces_sample_rate to 1.0 to capture 100%
+        # of transactions for performance monitoring.
+        traces_sample_rate=0.3,
+        # Set profiles_sample_rate to 1.0 to profile 100%
+        # of sampled transactions.
+        # We recommend adjusting this value in production.
+        profiles_sample_rate=0.3,
+    )
+
 
 ALLOWED_HOSTS = ['*'] if DEBUG else [f'{os.environ.get("DOMAIN")}', ]
 CSRF_TRUSTED_ORIGINS = [

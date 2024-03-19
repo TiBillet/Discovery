@@ -12,7 +12,7 @@ Requierement :
 poetry install
 poetry shell
 # Create super user
-python manage.py createsuperuser
+poetry run python manage.py createsuperuser
 # Run server
-python manage.py runserver
+poetry run python manage.py runserver
 ```

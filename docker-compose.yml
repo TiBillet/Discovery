@@ -20,8 +20,8 @@ services:
       - traefik.http.routers.discovery.rule=Host(`$DOMAIN`)
       - traefik.http.services.discovery.loadbalancer.server.port=8000
 
-#    command: "bash launch.sh"
-    command: "sleep infinity" # for dev
+    command: "bash launch.sh"
+#    command: "sleep infinity" # for dev
 
 
 networks:

@@ -38,7 +38,9 @@ def pin_code(request):
         "locale": server.locale,
     }
 
-    return Response(data, status=status.HTTP_200_OK)
+    # return Response(data, status=status.HTTP_200_OK)
+    # TODO: supprimer pour la prod
+    return Response(data, headers={"Access-Control-Allow-Origin":"*"}, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])

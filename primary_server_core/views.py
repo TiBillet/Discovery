@@ -9,7 +9,7 @@ from rest_framework.throttling import AnonRateThrottle
 from .models import CashlessServer, Client, ServerAPIKey
 from .permissions import HasAPIKey
 from .serializers import PinValidator, NewServerValidator, NewClientValidator
-from .utils import rsa_encrypt_string, hash_hexdigest
+from .utils import hash_hexdigest, get_client_ip
 
 
 # from the url the function will get the pin and will elaborate it
@@ -44,9 +44,9 @@ def pin_code(request):
 
 
 @api_view(['POST'])
-# @throttle_classes([AnonRateThrottle])
+@throttle_classes([AnonRateThrottle])
 def new_server(request):
-    print("new request received")
+    print(f"new_server request received : {get_client_ip(request)}")
     new_server_validator = NewServerValidator(data=request.data)
     if not new_server_validator.is_valid():
         return Response(new_server_validator.errors, status=status.HTTP_400_BAD_REQUEST)

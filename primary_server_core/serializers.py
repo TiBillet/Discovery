@@ -61,7 +61,8 @@ class NewServerValidator(serializers.Serializer):
         except Exception as e:
             raise serializers.ValidationError("Public key not valid, must be 2048 min rsa key")
 
-        print(f"public_key is_valid")
+        print(f"public_key format is_valid")
+        logger.info("public_key format is_valid from logger")
         self.sended_public_key = public_key
         return value
 
@@ -71,6 +72,7 @@ class NewServerValidator(serializers.Serializer):
 
         try :
             # On fait une requete au serveur pour valider la clé
+            logger.info(f"send signed_key for confirmation to {attrs['url']}")
             confirmation = requests.get(f"{attrs['url']}/api/signed_key/", verify=(not settings.DEBUG))
             if confirmation.status_code != 200:
                 raise serializers.ValidationError("URL Server not valid, confirmation request not reached")
@@ -84,14 +86,17 @@ class NewServerValidator(serializers.Serializer):
 
         # Vérification de la clé envoyé par le serveur et la clé envoyé par le lien de vérification
         # De cette façon, on vérifie l'url du serveur. La demande correspond bien à un serveur hebergé sur ce DNS.
+        logger.info(f"check the sended key and the public key reached")
         if not confirmation_public_pem.public_numbers() == sended_public_key.public_numbers():
             raise serializers.ValidationError("Pub Key from confirmation cashless not valid")
 
         # Vérification de la signature envoyé lors de la demande de confirmation
+        logger.info(f"check the the signature")
         is_valid = verify_signature(sended_public_key, data.get('public_pem').encode('utf-8'), data.get('signature'))
         if not is_valid:
             raise serializers.ValidationError("Signature not valid")
 
+        logger.info(f"NewServerValidator valid ! return attrs")
         return attrs
 
 

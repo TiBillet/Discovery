@@ -46,6 +46,7 @@ def pin_code(request):
 @api_view(['POST'])
 @throttle_classes([AnonRateThrottle])
 def new_server(request):
+    print("new request received")
     new_server_validator = NewServerValidator(data=request.data)
     if not new_server_validator.is_valid():
         return Response(new_server_validator.errors, status=status.HTTP_400_BAD_REQUEST)

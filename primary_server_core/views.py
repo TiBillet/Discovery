@@ -44,7 +44,7 @@ def pin_code(request):
 
 
 @api_view(['POST'])
-@throttle_classes([AnonRateThrottle])
+# @throttle_classes([AnonRateThrottle])
 def new_server(request):
     print("new request received")
     new_server_validator = NewServerValidator(data=request.data)

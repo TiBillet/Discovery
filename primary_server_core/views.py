@@ -9,8 +9,10 @@ from rest_framework.throttling import AnonRateThrottle
 from .models import CashlessServer, Client, ServerAPIKey
 from .permissions import HasAPIKey
 from .serializers import PinValidator, NewServerValidator, NewClientValidator
-from .utils import rsa_encrypt_string, hash_hexdigest
+from .utils import rsa_encrypt_string, hash_hexdigest, get_client_ip
 
+import logging
+logger = logging.getLogger(__name__)
 
 # from the url the function will get the pin and will elaborate it
 # to get the url from the data and will send a json with the server_url
@@ -46,32 +48,45 @@ def pin_code(request):
 @api_view(['POST'])
 # @throttle_classes([AnonRateThrottle])
 def new_server(request):
-    print("new request received")
+    logger.info(f"new_server request received. Ip : {get_client_ip(request)}")
     new_server_validator = NewServerValidator(data=request.data)
     if not new_server_validator.is_valid():
         return Response(new_server_validator.errors, status=status.HTTP_400_BAD_REQUEST)
     validated_data = new_server_validator.validated_data
+    logger.info(f"new_server request received. validated_data : {validated_data}")
 
     # L'url est stoquée chiffrée.
     # Pour faire une recherche, on la hash d'abord
     hashed_url = hash_hexdigest(validated_data['url'])
+    logger.info(f"new_server request received. hashed_url : {hashed_url}")
 
-    # La clé et sa signature on été validée.
-    # On remplace une eventuelle vieille clé si elle existe
-    server, created = CashlessServer.objects.get_or_create(hashed_url=hashed_url)
-    # Si le serveur existe déjà, on supprime les anciennes clés,
-    # en cas de reinstallation ou de changement de clé
-    # Le DNS a été validé par la requete de confirmation dans le validateur NewServerValidator
-    server.public_pem = validated_data['public_pem']
-    server.api_keys.all().delete()
-    server.set_url(validated_data['url'])
-    server.save()
+    try :
+        # The key and its signature have been validated.
+        # We replace any old key if it exists
+        server, created = CashlessServer.objects.get_or_create(hashed_url=hashed_url)
+        # If the server already exists, we delete the old keys,
+        # in the event of reinstallation or key change: The DNS has been validated by the confirmation request in the NewServerValidator.
+        server.public_pem = validated_data['public_pem']
+        server.api_keys.all().delete()
+        server.set_url(validated_data['url'])
+        server.save()
+        logger.info(f"serveur {server} updated. Created : {created}")
+    except Exception as e :
+        logger.error(f"get_or_create try error : {e}")
+        raise e
 
-    enc_key, key = ServerAPIKey.objects.create_key(name=f"{hashed_url}", server=server)
-    data = {
-        "created": created,
-        "key": key,
-    }
+
+    try:
+        # key create :
+        enc_key, key = ServerAPIKey.objects.create_key(name=f"{hashed_url}", server=server)
+        data = {
+            "created": created,
+            "key": key,
+        }
+        logger.info(f"Api Key created. return 201")
+    except Exception as e:
+        logger.error(f"api key creation : {e}")
+        raise e
     return Response(data, status=status.HTTP_201_CREATED)
 
 
